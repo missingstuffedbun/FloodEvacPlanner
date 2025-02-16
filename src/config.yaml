@@ -1,6 +1,7 @@
 input_path: '../input'
 output_path: '../output'
-files:
+logs_path: '../logs'
+shp_files:
   spaces: 'space02.shp'
   shelters: 'shelter_plan01.shp'
   map: 'map01.shp'
@@ -9,4 +10,10 @@ files:
   roads: 'network01.shp'
   road_nodes: 'network_node01.shp'
   floods: '720yy.shp'
+graph_files:
+  graph: 'graph_0.gml'
+  flooded_graph: 'graph_720.gml'
+tags:
+  flood_tag: '720'
+  shelter_tag: 'plan'
 random_seed: 2025
