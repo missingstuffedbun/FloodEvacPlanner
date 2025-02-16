@@ -1,4 +1,4 @@
-from . import logger, input_path
+from . import logger, input_path, output_path
 from src.utils.config import shp_files, gml_files
 from src.envs.graph import load_graph, remove_flooded_edges, build_road_graph
 from src.envs.shp import load_shp, get_coords_from_points
@@ -19,8 +19,8 @@ class Environment:
         self.road_nodes = load_shp(os.path.join(input_path, shp_files.get('road_nodes', '')))
         self.floods = load_shp(os.path.join(input_path, shp_files.get('floods', '')))
         # 使用 load_graph 根据配置文件加载数据，并赋值给相应的属性
-        self.graph = load_graph(os.path.join(input_path, gml_files.get('graph', '')))
-        self.flooded_graph = load_graph(os.path.join(input_path, gml_files.get('flooded_graph', '')))
+        self.graph = load_graph(os.path.join(output_path, gml_files.get('graph', '')))
+        self.flooded_graph = load_graph(os.path.join(output_path, gml_files.get('flooded_graph', '')))
 
 
     def __getattr__(self, item):

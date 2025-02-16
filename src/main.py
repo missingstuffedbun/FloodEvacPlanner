@@ -1,9 +1,9 @@
 from src.utils.config import get_logger, tags, output_path
-import os
-from envs.env import Environment
-from algorithms.Dijkstra import find_nearest_shelter, find_nodes_nearby, plan_Dijkstra, convert_path_to_coordinates
-from algorithms.routes import save_routes
+from src.envs.env import Environment
+from src.algorithms.Dijkstra import find_nearest_shelter, find_nodes_nearby, plan_Dijkstra, convert_path_to_coordinates
+from src.algorithms.routes import save_routes
 
+import os
 
 
 tag = "_".join(str(value) for value in tags.values())

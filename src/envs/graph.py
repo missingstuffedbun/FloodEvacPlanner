@@ -46,14 +46,12 @@ def build_road_graph(edges, nodes):
 
 
 
-def load_graph(file_name):
+def load_graph(file_path):
     """
     加载 GML 文件并返回图，如果文件不存在或加载失败，返回 None。
-    :param file_name: 图文件名，不需要文件扩展名（.gml）
+    :param file_path: 图文件名，不需要文件扩展名（.gml）
     :return: 网络图（NetworkX Graph）或 None
     """
-    file_path = os.path.join(output_path, file_name)
-
     try:
         # 尝试读取 GML 文件
         graph = nx.read_gml(file_path)
@@ -81,8 +79,6 @@ def load_graph(file_name):
         logger.error(f"Error while reading the GML file {file_path}: {e}")
     except Exception as e:
         logger.error(f"An unexpected error occurred while loading the graph: {e}")
-
-    # 如果发生任何异常或文件未找到，返回 None
     return None
 
 

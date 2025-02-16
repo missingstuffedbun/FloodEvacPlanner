@@ -16,9 +16,10 @@ def load_config(file_path):
 config = load_config(CONFIG_FILE_PATH)
 
 # 将配置文件中的键值对提取为变量
-input_path = os.path.abspath(config.get('input_path', '../input'))
-output_path = os.path.abspath(config.get('output_path', '../output'))
-logs_path = os.path.abspath(config.get('logs_path', '../logs'))
+project_path = os.path.abspath(config.get('project_path', '../..'))
+input_path = os.path.join(project_path, config.get('input_path', '/input'))
+output_path = os.path.join(project_path, config.get('output_path', '/output'))
+logs_path = os.path.join(project_path, config.get('logs_path', '../logs'))
 
 shp_files = config.get('shp_files', {})
 gml_files = config.get('gml_files', {})

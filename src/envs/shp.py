@@ -10,7 +10,7 @@ def load_shp(file_name):
     """
     加载一个 Shapefile 文件，并确保其转换为目标坐标参考系统（CRS）。
     """
-    file_path = os.path.join(input_path, f"{file_name}")
+    file_path = os.path.join(input_path, file_name)
 
     if not os.path.exists(file_path):
         logger.error(f"Shapefile {file_path} does not exist.")
