@@ -1,0 +1,12 @@
+input_path: '../input'
+output_path: '../output'
+files:
+  spaces: 'space02.shp'
+  shelters: 'shelter_plan01.shp'
+  map: 'map01.shp'
+  buildings: 'building01.shp'
+  rivers: 'river01.shp'
+  roads: 'network01.shp'
+  road_nodes: 'network_node01.shp'
+  floods: '720yy.shp'
+random_seed: 2025
