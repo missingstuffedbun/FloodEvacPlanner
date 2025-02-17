@@ -1,7 +1,7 @@
 project_path: '/jupyter/FloodEvacPlanner'
 input_path: 'input'
 output_path: 'output'
-logs_path: '../logs'
+logs_path: 'logs'
 shp_files:
   spaces: 'space02.shp'
   shelters: 'shelter_plan01.shp'
