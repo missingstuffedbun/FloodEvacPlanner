@@ -51,6 +51,7 @@ def main():
                         best_shelter = shelter_coords
         route = convert_path_to_coordinates(G=graph, path=best_route, start_coords=space_coords, end_coords=best_shelter)
         save_routes(start_coords=space_coords, route=route, file_path=route_file)
+    logger.info(f"================= THE END =================")
 
 
 if __name__ == "__main__":

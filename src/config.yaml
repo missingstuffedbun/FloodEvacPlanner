@@ -10,11 +10,11 @@ shp_files:
   rivers: 'river01.shp'
   roads: 'network01.shp'
   road_nodes: 'network_node01.shp'
-  floods: '720yy.shp'
+  floods: '100yy01.shp'
 gml_files:
   graph: 'graph_0.gml'
-  flooded_graph: 'graph_720.gml'
+  flooded_graph: 'graph_100.gml'
 tags:
-  flood_tag: '720'
-  shelter_tag: 'plan'
+  flood_tag: '100'
+  shelter_tag: 'plan01'
 random_seed: 2025
