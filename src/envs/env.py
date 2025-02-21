@@ -1,10 +1,18 @@
-from . import logger, input_path, output_path
-from src.utils.config import shp_files, gml_files
 from src.envs.graph import load_graph, remove_flooded_edges, build_road_graph
 from src.envs.shp import load_shp, get_coords_from_points
+from src.utils.config import ConfigSingleton
+from src.utils.log import LoggerSingleton
 
 import os
 import geopandas as gpd
+
+
+logger = LoggerSingleton().get_logger()
+config = ConfigSingleton().get_config()
+input_path = config.input_path
+output_path = config.output_path
+shp_files = config.shp_files
+gml_files = config.gml_files
 
 
 class Environment:
@@ -12,15 +20,15 @@ class Environment:
         # 使用 load_shp 根据配置文件加载数据，并赋值给相应的属性
         self.shelters = load_shp(os.path.join(input_path, shp_files.get('shelters', '')))
         self.spaces = load_shp(os.path.join(input_path, shp_files.get('spaces', '')))
-        self.map_file = load_shp(os.path.join(input_path, shp_files.get('map', '')))
+        self.map = load_shp(os.path.join(input_path, shp_files.get('map', '')))
         self.buildings = load_shp(os.path.join(input_path, shp_files.get('buildings', '')))
         self.rivers = load_shp(os.path.join(input_path, shp_files.get('rivers', '')))
         self.roads = load_shp(os.path.join(input_path, shp_files.get('roads', '')))
         self.road_nodes = load_shp(os.path.join(input_path, shp_files.get('road_nodes', '')))
         self.floods = load_shp(os.path.join(input_path, shp_files.get('floods', '')))
         # 使用 load_graph 根据配置文件加载数据，并赋值给相应的属性
-        self.graph = load_graph(os.path.join(output_path, gml_files.get('graph', '')))
-        self.flooded_graph = load_graph(os.path.join(output_path, gml_files.get('flooded_graph', '')))
+        self.graph = load_graph(os.path.join(input_path, gml_files.get('graph', '')))
+        self.flooded_graph = load_graph(os.path.join(input_path, gml_files.get('flooded_graph', '')))
 
 
     def __getattr__(self, item):
@@ -52,7 +60,7 @@ class Environment:
         shelters_in_rivers = self.shelters[
             self.shelters.geometry.apply(lambda x: any(x.within(river) for river in self.rivers.geometry))]
         # 输出日志，记录有多少个庇护所点被移除
-        logger.info(f"Removed {len(shelters_in_rivers)} shelters located within rivers.")
+        logger.debug(f"Removed {len(shelters_in_rivers)} shelters located within rivers.")
         # 从原始庇护所中移除这些点
         shelters_filtered = self.shelters[~self.shelters.index.isin(shelters_in_rivers.index)]
         self.shelters = shelters_filtered
@@ -63,5 +71,4 @@ class Environment:
         logger.debug(f"Flood area: {self.floods.geometry.area.sum()} -> {floods_clipped.geometry.area.sum()}")
         self.floods = floods_clipped
 
-    # 找到最近的 shelter，且距离超过阈值的忽略
 

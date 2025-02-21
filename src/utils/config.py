@@ -1,58 +1,73 @@
-import yaml
-import logging
 import os
-
-# 获取config.yaml文件的路径
-CONFIG_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'config.yaml')
-
-# 加载 YAML 配置文件并解析为字典
-def load_config(file_path):
-    with open(file_path, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
+import yaml
+from datetime import datetime
+import random
 
 
-# 读取配置文件
-config = load_config(CONFIG_FILE_PATH)
+class ConfigSingleton:
+    _instance = None  # 类变量，用于存储唯一实例
 
-# 将配置文件中的键值对提取为变量
-project_path = os.path.abspath(config.get('project_path', '../..'))
-input_path = os.path.join(project_path, config.get('input_path', '/input'))
-output_path = os.path.join(project_path, config.get('output_path', '/output'))
-logs_path = os.path.join(project_path, config.get('logs_path', '../logs'))
+    def __new__(cls, config_file_path=None):
+        # 只在第一次创建实例时初始化
+        if not cls._instance:
+            if config_file_path is None:
+                raise ValueError("config_file_path must be provided during first initialization")
+            cls._instance = super(ConfigSingleton, cls).__new__(cls)
+            cls._instance._initialize(config_file_path)
+        return cls._instance
 
-shp_files = config.get('shp_files', {})
-gml_files = config.get('gml_files', {})
+    def _initialize(self, config_file_path):
+        # 初始化配置
+        self.config_file_path = config_file_path
+        self.config = self.load_config(config_file_path)
 
-random_seed = config.get('random_seed', 2025)
+        # 提取常用配置项
+        self.task_id = self.config.get('tasks_id', datetime.now().strftime('%Y%m%d%H%M%S'))
+        self.tasks = self.config.get('tasks', {})
+        
+        self.project_path = os.path.abspath(self.config.get('project_path', '../..'))
+        self.logs_path = os.path.join(self.project_path, self.config.get('logs_path', 'logs'))
+        self.input_path = os.path.join(self.project_path, self.config.get('input_path', 'input'))
+        self.output_path = os.path.join(self.project_path, self.config.get('output_path', 'output'), self.task_id)
+        
+        if not os.path.exists(self.output_path):
+            os.makedirs(self.output_path)
 
-tags = config.get('tags', {})
+        self.shp_files = self.config.get('shp_files', {})
+        self.gml_files = self.config.get('gml_files', {})
 
-# 设置日志的格式
-log_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+        self.random_seed = self.config.get('random_seed', 2025)
+        random.seed(self.random_seed)
+        
+        self.tags = self.config.get('tags', {})
 
+        
 
-def get_logger(module_name):
-    """
-    为指定模块获取一个 logger 实例，并分别配置文件和控制台输出。
+    def load_config(self, file_path):
+        """
+        读取配置文件并返回配置内容
+        """
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Configuration file not found at {file_path}")
 
-    :param module_name: 模块名，用于标识日志的来源
-    :return: logger 实例
-    """
-    logger = logging.getLogger(module_name)
-    logger.setLevel(logging.DEBUG)  # 设置默认日志级别为 DEBUG
+        with open(file_path, 'r') as file:
+            return yaml.safe_load(file)
 
-    # 控制台输出，设置级别为 INFO
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(log_formatter)
-    logger.addHandler(console_handler)
+    def get(self, key, default=None):
+        """
+        获取配置文件中的值，若不存在则返回默认值
+        """
+        return self.config.get(key, default)
 
-    # 文件输出，设置级别为 DEBUG
-    log_file_path = os.path.join(logs_path, f"{module_name}.log")
-    file_handler = logging.FileHandler(log_file_path)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(log_formatter)
-    logger.addHandler(file_handler)
+    def __getattr__(self, item):
+        """
+        动态获取配置项的值。如果项不存在，返回 None。
+        :param item: 配置项的名称（如 'tags'等）
+        :return: 配置项的值，如果不存在则返回 None
+        """
+        return self.files_data.get(item, None)
 
-    return logger
+    def get_config(self):
+        """返回已初始化的logger"""
+        return self._instance
+

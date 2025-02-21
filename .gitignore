@@ -176,3 +176,5 @@ cython_debug/
 /input/
 /output/
 /logs/
+
+nohup.out

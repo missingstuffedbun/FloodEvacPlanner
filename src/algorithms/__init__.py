@@ -2,13 +2,7 @@ import numpy as np
 import random
 from shapely.geometry import Point, LineString
 import geopandas as gpd
-from src.utils.config import get_logger, random_seed
-
-
-# 获取当前模块的 logger
-logger = get_logger(__name__)
-
-random.seed(random_seed)
+import os
 
 
 # 计算两个点之间的欧几里得距离
@@ -86,3 +80,5 @@ def generate_random_point(boundary):
         y = random.uniform(ymin, ymax)
         if not is_in_obstacle(x, y):  # 确保点不在障碍物中
             return (x, y)
+
+

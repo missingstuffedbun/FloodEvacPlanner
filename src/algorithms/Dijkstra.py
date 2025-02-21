@@ -1,9 +1,67 @@
-from . import euclidean_distance, is_connected
+from src.algorithms.algorithm import Algorithm
+from src.algorithms import euclidean_distance, is_connected 
+from src.algorithms.routes import save_routes, format_routes
+from src.utils.config import ConfigSingleton
+from src.envs.env import Environment
 
 import networkx as nx
+import os
 
 
+class DijkstraAlgorithm(Algorithm):
+    def __init__(self, env: Environment, config: ConfigSingleton):
+        self.config = config
+        self.env = env
+        self.algo = 'Dijkstra'
 
+    def preprocess(self):
+        self.env.graph_for_Dijkstra()
+        self.tag = "_".join(str(value) for value in self.config.tags.values())
+        self.route_file = os.path.join(self.config.output_path, f"routes_{self.algo}_{self.tag}.txt")
+
+    def run(self):
+        shelters_coords = self.env.shelters_coords
+        spaces_coords = self.env.spaces_coords
+        graph = self.env.graph_Dijkstra
+    
+        paths = dict()
+        for space_coords in spaces_coords:
+            nearest_shelter = find_nearest_shelter(coords=space_coords, shelters_coords=shelters_coords,
+                                                   distance_threshold=100)
+            if nearest_shelter:
+                save_routes(start_coords=space_coords, route=[space_coords, nearest_shelter], file_path=self.route_file)
+                continue
+            start_nodes = find_nodes_nearby(G=graph, coords=space_coords, distance_threshold=100, ignore_flood=True)
+            best_route = None
+            best_route_weight = float('inf')
+            best_shelter = None
+            for start in start_nodes:
+                for shelter_coords in shelters_coords:
+                    end_nodes = find_nodes_nearby(G=graph, coords=shelter_coords, distance_threshold=100,
+                                                  ignore_flood=True)
+                    for end in end_nodes:
+                        if (start, end) in paths.keys():
+                            path_weight = paths[(start, end)]['weight']
+                            if best_route_weight > path_weight:
+                                best_route_weight = path_weight
+                                best_route = paths[(start, end)]['path']
+                                best_shelter = paths[(start, end)]['shelter']
+                            continue
+                        path, path_weight = plan_Dijkstra(G=graph, start=start, end=end)
+                        paths[(start, end)] = {'path': path, 'weight': path_weight, 'shelter': shelter_coords}
+                        if best_route_weight > path_weight:
+                            best_route_weight = path_weight
+                            best_route = path
+                            best_shelter = shelter_coords
+            route = convert_path_to_coordinates(G=graph, path=best_route, start_coords=space_coords,
+                                                end_coords=best_shelter)
+            save_routes(start_coords=space_coords, route=route, file_path=self.route_file)
+
+
+    def postprocess(self):
+        format_routes(self.route_file)
+
+        
 def plan_Dijkstra(G, start, end):
     """
     计算最短路径，并返回最短路径及其权重

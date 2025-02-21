@@ -1,7 +1,15 @@
-from . import logger, input_path
-
 import os
 import geopandas as gpd
+
+
+from src.utils.config import ConfigSingleton
+from src.utils.log import LoggerSingleton
+
+
+logger = LoggerSingleton().get_logger()
+config = ConfigSingleton().get_config()
+input_path = config.input_path
+
 
 
 target_crs = 'EPSG:32649'

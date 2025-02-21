@@ -1,10 +1,12 @@
-from . import output_path, logger
-
 import networkx as nx
 from shapely.geometry import Point
-import os
 import ast
 from shapely.geometry import LineString
+
+
+from src.utils.log import LoggerSingleton
+
+logger = LoggerSingleton().get_logger()
 
 
 def build_road_graph(edges, nodes):
