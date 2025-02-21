@@ -35,6 +35,7 @@ class LoadEnvironmentTask(Task):
         super().execute(context)
 
 
+
 class PathPlanningTask(Task):
     def execute(self, context: TaskContext):
         from src.algorithms.algorithm import AlgorithmFactory
@@ -49,6 +50,7 @@ class PathPlanningTask(Task):
         self.context.algo = algo
         super().execute(context)
 
+
 class RouteVisualizationTask(Task):
     def execute(self, context: TaskContext):
         from src.utils.visualize import Visualize, EnvironmentLayer, GraphLayer, RouteLayer
@@ -57,9 +59,7 @@ class RouteVisualizationTask(Task):
 
         route_file = self.context.algo.route_file if self.context.algo else os.path.join(self.context.config.project_path, self.context.config.tasks.get('VIS_ROUTE'))
         routes = load_routes(route_file)
-        
         environment_layer = EnvironmentLayer(self.context.env)
-        # environment_layer = EnvironmentLayer(self.context.env, plot_include=['map', 'buildings', 'spaces', 'rivers', 'floods'])
         G = self.context.env.flooded_graph if self.context.env.flooded_graph else self.context.env.graph
         graph_layer = GraphLayer(G=G)
         route_layer = RouteLayer(routes=routes)
@@ -70,13 +70,11 @@ class RouteVisualizationTask(Task):
 
 
 
-# 任务类型的映射字典
 TASK_MAPPING = {
     'LOAD_ENV': LoadEnvironmentTask,
     'RUN_ALGO': PathPlanningTask,
     'VIS_ROUTE': RouteVisualizationTask,
 }
-
 
 # 根据配置动态生成任务链
 def create_task_chain(task_types, context, **kwargs):

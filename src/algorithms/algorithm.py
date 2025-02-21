@@ -39,7 +39,8 @@ class AlgorithmFactory:
         if algorithm_type == 'Dijkstra':
             from src.algorithms.Dijkstra import DijkstraAlgorithm
             return DijkstraAlgorithm(env, config)
-        # elif algorithm_type == 'AStar':
-        #     return AStarAlgorithm(env, config)
+        elif algorithm_type == 'RRT':
+            from src.algorithms.RRT import RRTAlgorithm
+            return RRTAlgorithm(env, config)
         else:
             raise ValueError("Unknown algorithm type")

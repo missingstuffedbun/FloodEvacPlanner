@@ -1,12 +1,12 @@
-project_path: '/jupyter/test/FloodEvacPlanner'
+project_path: '/jupyter/FloodEvacPlanner'
 input_path: 'input'
 output_path: 'output'
 logs_path: 'logs'
 
-tasks_id: '05'
+tasks_id: 'test_RRT_routetree'
 tasks: 
   LOAD_ENV: true
-  RUN_ALGO: 'Dijkstra'
+  RUN_ALGO: 'RRT'
   VIS_ROUTE: true
 
 shp_files:
@@ -17,14 +17,14 @@ shp_files:
   rivers: 'river01.shp'
   roads: 'network01.shp'
   road_nodes: 'network_node01.shp'
-  floods: '05yy01.shp'
+  floods: '50yy01.shp'
 
 gml_files:
   graph: 'graph_0.gml'
-  flooded_graph: 'graph_05.gml'
+  flooded_graph: 'graph_50.gml'
 
 tags:
-  flood_tag: '05'
+  flood_tag: '50'
   shelter_tag: 'plan'
 
 random_seed: 2025

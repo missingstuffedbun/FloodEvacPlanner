@@ -1,10 +1,11 @@
 from src.envs.graph import load_graph, remove_flooded_edges, build_road_graph
-from src.envs.shp import load_shp, get_coords_from_points
+from src.envs.shp import load_shp, get_coords_from_points, buffer_circles_from_points
 from src.utils.config import ConfigSingleton
 from src.utils.log import LoggerSingleton
 
 import os
 import geopandas as gpd
+from shapely.geometry import Point, LineString
 
 
 logger = LoggerSingleton().get_logger()
@@ -42,9 +43,11 @@ class Environment:
     def preprocessing(self):
         self.remove_shelters_in_rivers()
         self.shelters_coords = get_coords_from_points(self.shelters)
+        self.shelter_circles = buffer_circles_from_points(self.shelters_coords, radius=100)
         self.spaces_coords = get_coords_from_points(self.spaces)
         if self.floods is not None:
             self.clip_flood()
+
 
     def graph_for_Dijkstra(self):
         if self.flooded_graph is not None:
@@ -71,4 +74,66 @@ class Environment:
         logger.debug(f"Flood area: {self.floods.geometry.area.sum()} -> {floods_clipped.geometry.area.sum()}")
         self.floods = floods_clipped
 
+    def step_condition(self, start, end):
+        line = LineString([start, end])
+        gdf = gpd.GeoDataFrame(geometry=[])
+    
+        if not line.within(self.map.geometry.unary_union):
+            return "map", self.map.geometry.unary_union
+    
+        for flood in self.floods.geometry:
+            if flood.intersects(line):  # 判断路径段是否与积水相交
+                return "flood", flood
+    
+        for shelter in self.shelter_circles.geometry:
+            if shelter.intersects(line):  # 判断路径段是否与避难所相交
+                return "shelter", shelter
+    
+        for river in self.rivers.geometry:
+            if river.intersects(line):  # 判断路径段是否与河流相交
+                return "river", river
+    
+        for building in self.buildings.geometry:
+            if building.intersects(line):  # 判断路径段是否与建筑物相交
+                return "building", building
+    
+        # 如果路径段没有经过障碍物或避难所
+        return "pass", None
 
+    
+    def is_connected(self, x, y):
+        condition, obj = self.step_condition(x, y)
+        if condition not in ["map", "river", "flood"]:
+            return True
+        return False
+
+
+    # 判断点是否在障碍物中
+    def is_in_obstacle(self, x, y):
+        point = Point(x, y)
+    
+        if not self.map.geometry.unary_union.contains(point):
+            logger.debug(f"Point({x},{y}) not in the map")
+            return True
+    
+        for geom in self.floods.geometry:
+            if geom.contains(point):
+                logger.debug(f"Point({x},{y}) in a flooded area")
+                return True
+    
+        for geom in self.rivers.geometry:
+            if geom.contains(point):
+                logger.debug(f"Point({x},{y}) in a river")
+                return True
+        return False
+
+    # 生成随机点
+    def generate_random_point(self):
+        xmin, ymin, xmax, ymax = self.map.geometry.unary_union.envelope
+        while True:
+            x = random.uniform(xmin, xmax)
+            y = random.uniform(ymin, ymax)
+            if not self.is_in_obstacle(x, y):  # 确保点不在障碍物中
+                return (x, y)
+
+    
