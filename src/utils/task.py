@@ -39,7 +39,8 @@ class LoadEnvironmentTask(Task):
 class PathPlanningTask(Task):
     def execute(self, context: TaskContext):
         from src.algorithms.algorithm import AlgorithmFactory
-        
+
+        self.context.algo_name = self.context.config.tasks.get('RUN_ALGO', None)
         if not self.context.algo_name:
             raise ValueError("Algorithm name (algo_name) is required for PathPlanningTask.")
             

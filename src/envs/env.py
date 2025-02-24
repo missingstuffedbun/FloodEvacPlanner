@@ -6,6 +6,8 @@ from src.utils.log import LoggerSingleton
 import os
 import geopandas as gpd
 from shapely.geometry import Point, LineString
+import networkx as nx
+import random
 
 
 logger = LoggerSingleton().get_logger()
@@ -43,10 +45,17 @@ class Environment:
     def preprocessing(self):
         self.remove_shelters_in_rivers()
         self.shelters_coords = get_coords_from_points(self.shelters)
-        self.shelter_circles = buffer_circles_from_points(self.shelters_coords, radius=100)
+        self.shelter_circles = buffer_circles_from_points(self.shelters, radius=100)
         self.spaces_coords = get_coords_from_points(self.spaces)
         if self.floods is not None:
             self.clip_flood()
+        if self.graph is None:
+            self.graph = build_road_graph(edges=self.roads, nodes=self.road_nodes)
+            nx.write_gml(self.graph, os.path.join(output_path, "graph_0.gml"))
+        if self.flooded_graph is None and self.floods is not None:
+            self.flooded_graph = remove_flooded_edges(G=self.graph, floods=self.floods)
+            nx.write_gml(self.graph, os.path.join(output_path, gml_files.get('flooded_graph')))
+
 
 
     def graph_for_Dijkstra(self):
@@ -54,23 +63,20 @@ class Environment:
             self.graph_Dijkstra = self.flooded_graph
         elif self.graph is not None:
             self.graph_Dijkstra = remove_flooded_edges(G=self.graph, floods=self.floods)
-        else:
-            self.graph_Dijkstra = build_road_graph(edges=self.roads, nodes=self.road_nodes)
-
 
     def remove_shelters_in_rivers(self):
         # 创建一个掩码，检查每个庇护所是否位于河流的多边形内
         shelters_in_rivers = self.shelters[
             self.shelters.geometry.apply(lambda x: any(x.within(river) for river in self.rivers.geometry))]
         # 输出日志，记录有多少个庇护所点被移除
-        logger.debug(f"Removed {len(shelters_in_rivers)} shelters located within rivers.")
+        logger.info(f"Removed {len(shelters_in_rivers)} shelters located within rivers.")
         # 从原始庇护所中移除这些点
         shelters_filtered = self.shelters[~self.shelters.index.isin(shelters_in_rivers.index)]
         self.shelters = shelters_filtered
 
     def clip_flood(self):
         # 执行洪灾区域剪裁
-        floods_clipped = gpd.overlay(self.floods, self.rivers, how='difference')
+        floods_clipped = gpd.overlay(self.floods, self.rivers, how='difference', keep_geom_type=False)
         logger.debug(f"Flood area: {self.floods.geometry.area.sum()} -> {floods_clipped.geometry.area.sum()}")
         self.floods = floods_clipped
 

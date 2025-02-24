@@ -1,3 +1,5 @@
+
+
 from src.algorithms.algorithm import Algorithm
 from src.algorithms import euclidean_distance 
 from src.algorithms.routes import save_routes, format_routes, save_route_tree
@@ -5,8 +7,9 @@ from src.utils.config import ConfigSingleton
 from src.envs.env import Environment
 
 import os
-import random
-import geopandas as gpd
+from datetime import datetime
+from shapely import LineString
+import numpy as np
 
 
 
@@ -30,7 +33,7 @@ class RRTAlgorithm(Algorithm):
 
     def run(self):
         for start in self.env.spaces_coords:
-            route, route_tree = plan_RRT(start_coords=start, **self.params)
+            route, route_tree = self.plan_RRT(start_coords=start, **self.params)
             save_routes(start_coords=start, route=route, file_path=self.route_file)
             save_route_tree(start_coords=start, route_tree=route_tree, file_path=self.routetree_file)
 
@@ -101,11 +104,9 @@ class RRTAlgorithm(Algorithm):
                 # 将新节点加入到树中
                 nodes.append(tuple(new_node))
                 parent[tuple(new_node)] = tuple(nearest_node)
-    
-                if debug:
-                    # 保存所有路径
-                    all_routes.append([nearest_node, new_node])
-                    lines = [LineString(route) for route in all_routes]
+                # 保存所有路径
+                all_routes.append([nearest_node, new_node])
+                lines = [LineString(route) for route in all_routes]
     
             # 将新节点加入到树中
             nodes.append(tuple(new_node))

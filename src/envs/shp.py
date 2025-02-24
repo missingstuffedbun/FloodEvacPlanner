@@ -30,7 +30,7 @@ def load_shp(file_name):
 
     # 如果CRS不一致，转换坐标系统
     if gdf.crs != target_crs:
-        logger.info(f"Reprojecting {file_name}.shp to {target_crs} CRS.")
+        logger.info(f"Reprojecting {file_name} to {target_crs} CRS.")
         gdf = gdf.to_crs(target_crs)
 
     return gdf

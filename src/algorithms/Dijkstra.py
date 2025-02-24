@@ -1,5 +1,5 @@
 from src.algorithms.algorithm import Algorithm
-from src.algorithms import euclidean_distance, is_connected 
+from src.algorithms import euclidean_distance
 from src.algorithms.routes import save_routes, format_routes
 from src.utils.config import ConfigSingleton
 from src.envs.env import Environment
