@@ -1,5 +1,3 @@
-
-
 from src.algorithms.algorithm import Algorithm
 from src.algorithms import euclidean_distance 
 from src.algorithms.routes import save_routes, format_routes, save_route_tree

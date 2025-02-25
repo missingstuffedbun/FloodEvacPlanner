@@ -26,7 +26,7 @@ def load_shp(file_name):
 
     # 加载数据
     gdf = gpd.read_file(file_path)
-    logger.info(f"Loaded data from {file_name}.shp with CRS {gdf.crs}")
+    logger.info(f"Loaded data from {file_name} with CRS {gdf.crs}")
 
     # 如果CRS不一致，转换坐标系统
     if gdf.crs != target_crs:

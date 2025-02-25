@@ -14,34 +14,33 @@ def build_road_graph(edges, nodes):
     G = nx.Graph()
 
     # 创建节点坐标字典
-    node_dict = { (node.geometry.x, node.geometry.y): node["OBJECTID"] for _, node in nodes.iterrows() }
+    node_dict = {(node.geometry.x, node.geometry.y): node["FID1"] for _, node in nodes.iterrows()}
 
     # 添加节点
     for _, node in nodes.iterrows():
-        G.add_node(node["OBJECTID"], pos=(node.geometry.x, node.geometry.y))
+        G.add_node(
+            node["FID1"],
+            pos=(node.geometry.x, node.geometry.y),
+            node_code=node["Node_code"]
+        )
 
     # 添加边
     for _, edge in edges.iterrows():
         start_coord = edge.geometry.coords[0]  # 线的起点 (x, y)
         end_coord = edge.geometry.coords[-1]   # 线的终点 (x, y)
-        if start_coord == end_coord:
-            continue
 
         # 查找节点 ID
         start_id = node_dict.get(start_coord, None)
         end_id = node_dict.get(end_coord, None)
-
-        # 如果找不到确切匹配的节点，则尝试最近匹配
-        if start_id is None:
-            start_id = min(node_dict, key=lambda k: Point(k).distance(Point(start_coord)))
-            start_id = node_dict[start_id]
-
-        if end_id is None:
-            end_id = min(node_dict, key=lambda k: Point(k).distance(Point(end_coord)))
-            end_id = node_dict[end_id]
+        if start_id is None or end_id is None or start_id==end_id:
+            continue
 
         # 添加边
-        G.add_edge(start_id, end_id, weight=edge["Shape_Leng"])  # 使用 Shape_Leng 作为权重
+        G.add_edge(
+            start_id, end_id,
+            weight=edge["Shape_Leng"],
+            edge_code=edge["Class"]
+        )
 
     logger.info(f"Build graph with {len(G.nodes)} nodes and {len(G.edges)} edges")
     return G
@@ -109,6 +108,5 @@ def remove_flooded_edges(G, floods):
 
     # 从图中删除受影响的边
     G.remove_edges_from(edges_to_remove)
-
     logger.info(f"Remove {len(edges_to_remove)} edges")
     return G

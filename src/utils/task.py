@@ -69,10 +69,20 @@ class RouteVisualizationTask(Task):
         vis.plot()
         super().execute(context)
 
+class EnvVisualizationTask(Task):
+    def execute(self, context: TaskContext):
+        from src.utils.visualize import Visualize, EnvironmentLayer, GraphLayer
+
+        environment_layer = EnvironmentLayer(self.context.env, plot_set=['map','buildings', 'rivers','floods'])
+        graph_layer = GraphLayer(G=self.context.env.flooded_graph, plot_set=['edges', 'nodes'])
+        vis = Visualize(environment_layer=environment_layer, graph_layer=graph_layer, route_layer=None, output_name='test_1283')
+        vis.plot()
+        super().execute(context)
 
 
 TASK_MAPPING = {
     'LOAD_ENV': LoadEnvironmentTask,
+    'VIS_ENV': EnvVisualizationTask,
     'RUN_ALGO': PathPlanningTask,
     'VIS_ROUTE': RouteVisualizationTask,
 }

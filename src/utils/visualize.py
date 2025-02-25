@@ -18,8 +18,8 @@ logger = LoggerSingleton().get_logger()
 class EnvironmentLayer:
     def __init__(self, env: Environment, 
                  plot_set=None,
-                 plot_include=['map', 'shelters', 'spaces','buildings', 'floods', 'rivers', 'roads', 'road_nodes'],
-                 plot_exclude=['shelters', 'spaces', 'roads', 'road_nodes']
+                 plot_include=['map','buildings', 'floods', 'rivers', 'roads', 'road_nodes'],
+                 plot_exclude=['roads', 'road_nodes']
                 ):
         self.env = env
         self.plot_set = plot_set if plot_set is not None else set(plot_include).difference(set(plot_exclude))
@@ -36,18 +36,9 @@ class EnvironmentLayer:
             self.env.map.boundary.plot(ax=ax, color='black', linewidth=1, zorder=1)
             self.env.map.plot(ax=ax, color='gray', alpha=0.1)
 
-        # if 'shelters' in self.plot_set:
-        #     self.env.shelters.plot(marker='o', color='green', markersize=10, alpha=0.4, label='Shelter', zorder=32)
-        #     self.handlers.append(Line2D([0], [0], marker='o', color='green', markerfacecolor='green', markersize=10, label='Shelter'))
-
-        # if 'spaces' in self.plot_set:
-        #     self.env.spaces.plot(marker='o', color='red', markersize=10, alpha=0.4, label='Underground Space', zorder=31)
-        #     self.handlers.append(Line2D([0], [0], marker='o', color='red', markerfacecolor='red', markersize=10, label='Underground Space'))
-
         if 'buildings' in self.plot_set:
             self.env.buildings.plot(ax=ax, color='brown', alpha=0.6, label='Building', zorder=2)
             self.handlers.append(Patch(color='brown', alpha=0.6, label='Building'))
-
 
         if 'floods' in self.plot_set:
             self.env.floods.plot(ax=ax, color='purple', alpha=0.4, label='Flood', zorder=6)
@@ -56,7 +47,6 @@ class EnvironmentLayer:
         if 'rivers' in self.plot_set:
             self.env.rivers.plot(ax=ax, color='blue', alpha=0.4, label='River', zorder=5)
             self.handlers.append(Patch(color='blue', alpha=0.4, label='River'))
-
         
         if 'roads' in self.plot_set:
             self.env.roads.plot(ax=ax, color='blue', linewidth=1, label='Road', zorder=4)
@@ -81,12 +71,65 @@ class GraphLayer:
             ax = plt.gca()
 
         pos = nx.get_node_attributes(self.G, "pos")  # 获取节点位置
+
+        # 绘制网络
         if 'edges' in self.plot_set:
-            nx.draw_networkx_edges(self.G, pos, ax=ax, edge_color="gray", alpha=0.3, width=0.5)
+            edge_code_widths = {
+                'motorway': 7.0,  # 高速公路 (7倍于 footway)
+                'trunk_link': 6.0,  # 干线连接
+                'footway': 1.0,  # 步道 (基准，宽度为1)
+                'living_street': 2.0,  # 生活街道
+                'primary': 5.0,  # 主路
+                'unclassified': 1,  # 未分类道路
+                'primary_link': 4.0,  # 主路连接
+                'motorway_link': 6.0,  # 高速公路连接
+                'residential': 2.0,  # 住宅区道路
+                'cycleway': 1.2,  # 自行车道
+                'trunk': 6.0,  # 干线
+                'secondary': 3.0,  # 次要道路
+                'pedestrian': 0.8,  # 步行道
+                'path': 1.0,  # 小路
+                'service': 1.5,  # 服务道路
+                'tertiary': 2.2,  # 第三级道路
+                'steps': 0.3,  # 台阶
+                'secondary_link': 3.0,  # 次要路连接
+                'tertiary_link': 2.5  # 第三级路连接
+            }
+            edge_widths = [
+                1.0+edge_code_widths.get(edge_data.get('edge_code', 'unclassified'))/10.0
+                for u, v, edge_data in self.G.edges(data=True)
+            ]
+
+            nx.draw_networkx_edges(
+                self.G, pos, ax=ax, edge_color="gray", alpha=0.3, width=edge_widths
+            )
             self.handlers.append(Line2D([0], [0], color='gray', lw=2, alpha=0.3, label="Road"))
+
         if 'nodes' in self.plot_set:
-            nx.draw_networkx_nodes(self.G, pos, ax=ax, node_color="gray", node_size=10, alpha=0.6)
-            self.handlers.append(Line2D([0], [0], marker='o', color='gray', markerfacecolor='blue', markersize=8, label="Intersection"))
+            # 定义每种 node_code 对应的颜色和大小
+            node_code_colors = {
+                1.0: 'gray', # intersection
+                2.0: 'gray',
+                1283.0: 'red', # space
+                8.0: 'green', # shelter
+                171.0: 'green',
+            }
+            node_code_sizes = {
+                1.0: 0.5,
+                2.0: 0.5,
+                1283.0: 4,
+                8.0: 8,
+                171.0: 8,
+            }
+            # 获取每个节点的颜色和大小
+            node_colors = [node_code_colors.get(data.get('node_code', 1.0), 'gray') for node, data in self.G.nodes(data=True)]
+            node_sizes = [node_code_sizes.get(data.get('node_code', 1.0), 1) for node, data in self.G.nodes(data=True)]
+
+            nx.draw_networkx_nodes(self.G, pos, ax=ax, node_color=node_colors, node_size=node_sizes, alpha=0.6)
+
+            self.handlers.append(Line2D([0], [0], marker='o', color='gray', markerfacecolor='gray', markersize=0.5, label="Intersection"))
+            self.handlers.append(Line2D([0], [0], marker='o', color='gray', markerfacecolor='red', markersize=4, label="Underground Space"))
+            self.handlers.append(Line2D([0], [0], marker='o', color='gray', markerfacecolor='green', markersize=8, label="Shelter"))
 
 
 
@@ -123,11 +166,6 @@ class RouteLayer:
                 self.handlers.append(scatter)
                 scatter = ax.scatter(route[-1][0], route[-1][1], color='green', label='Shelter', alpha=0.4, s=10, zorder=22)
                 self.handlers.append(scatter)
-        
-        # self.handlers.append(Line2D([0], [0], marker='o', color='grey', lw=2, alpha=0.4, label="Non-Accessible Underground Space"))
-        # self.handlers.append(Line2D([0], [0], marker='o', color='red', lw=2, alpha=0.4, label="Accessible Underground Space"))
-        # self.handlers.append(Line2D([0], [0], marker='o', color='green', lw=2, alpha=0.4, label="Shelter"))
-
 
 
 # 可视化类
@@ -141,6 +179,9 @@ class Visualize:
             setattr(self, key, value)
 
     def plot(self):
+        import matplotlib
+        matplotlib.use('TkAgg')
+
         # 创建一个新的图形
         fig, ax = plt.subplots(figsize=(10, 8))
         handlers = []

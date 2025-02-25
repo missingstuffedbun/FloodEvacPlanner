@@ -21,14 +21,12 @@ gml_files = config.gml_files
 class Environment:
     def __init__(self):
         # 使用 load_shp 根据配置文件加载数据，并赋值给相应的属性
-        self.shelters = load_shp(os.path.join(input_path, shp_files.get('shelters', '')))
-        self.spaces = load_shp(os.path.join(input_path, shp_files.get('spaces', '')))
         self.map = load_shp(os.path.join(input_path, shp_files.get('map', '')))
         self.buildings = load_shp(os.path.join(input_path, shp_files.get('buildings', '')))
         self.rivers = load_shp(os.path.join(input_path, shp_files.get('rivers', '')))
+        self.floods = load_shp(os.path.join(input_path, shp_files.get('floods', '')))
         self.roads = load_shp(os.path.join(input_path, shp_files.get('roads', '')))
         self.road_nodes = load_shp(os.path.join(input_path, shp_files.get('road_nodes', '')))
-        self.floods = load_shp(os.path.join(input_path, shp_files.get('floods', '')))
         # 使用 load_graph 根据配置文件加载数据，并赋值给相应的属性
         self.graph = load_graph(os.path.join(input_path, gml_files.get('graph', '')))
         self.flooded_graph = load_graph(os.path.join(input_path, gml_files.get('flooded_graph', '')))
@@ -43,16 +41,12 @@ class Environment:
         return self.files_data.get(item, None)
 
     def preprocessing(self):
-        self.remove_shelters_in_rivers()
-        self.shelters_coords = get_coords_from_points(self.shelters)
-        self.shelter_circles = buffer_circles_from_points(self.shelters, radius=100)
-        self.spaces_coords = get_coords_from_points(self.spaces)
         if self.floods is not None:
             self.clip_flood()
-        if self.graph is None:
+        if not isinstance(self.graph, nx.Graph):
             self.graph = build_road_graph(edges=self.roads, nodes=self.road_nodes)
             nx.write_gml(self.graph, os.path.join(output_path, "graph_0.gml"))
-        if self.flooded_graph is None and self.floods is not None:
+        if not isinstance(self.flooded_graph, nx.Graph) and isinstance(self.floods, gpd.GeoDataFrame):
             self.flooded_graph = remove_flooded_edges(G=self.graph, floods=self.floods)
             nx.write_gml(self.graph, os.path.join(output_path, gml_files.get('flooded_graph')))
 
