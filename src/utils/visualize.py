@@ -109,10 +109,10 @@ class GraphLayer:
             # 定义每种 node_code 对应的颜色和大小
             node_code_colors = {
                 1.0: 'gray', # intersection
-                2.0: 'gray',
+                2.0: 'gray', # intersection - new
                 1283.0: 'red', # space
-                8.0: 'green', # shelter
-                171.0: 'green',
+                8.0: 'green', # shelter - zz
+                171.0: 'green', # shelter - plan
             }
             node_code_sizes = {
                 1.0: 0.5,
