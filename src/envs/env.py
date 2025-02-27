@@ -52,6 +52,7 @@ class Environment:
         self.G = self.flooded_graph if self.flooded_graph is not None else self.graph
 
 
+
     def remove_shelters_in_rivers(self):
         # 创建一个掩码，检查每个庇护所是否位于河流的多边形内
         shelters_in_rivers = self.shelters[

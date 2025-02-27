@@ -1,10 +1,25 @@
 import ast
 import os
+import json
 
 from src.utils.log import LoggerSingleton
 
 
 logger = LoggerSingleton().get_logger()
+
+
+
+def save_route_tree(route_tree, file_path):
+    # 将字典数据存储为 JSON 格式
+    with open(file_path, "w") as f:
+        json.dump(route_tree, f)
+
+
+def load_route_tree(file_path):
+    # 从 JSON 文件中加载字典数据
+    with open(file_path, "r") as f:
+        route_tree = json.load(f)
+    return route_tree
 
 
 def save_routes(start_coords, route, file_path):

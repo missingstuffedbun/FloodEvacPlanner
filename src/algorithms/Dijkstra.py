@@ -1,11 +1,16 @@
 from src.algorithms.algorithm import Algorithm
+from src.algorithms import convert_path_to_coordinates
 from src.algorithms.routes import save_routes, format_routes
 from src.utils.config import ConfigSingleton
+from src.utils.log import LoggerSingleton
 from src.envs.env import Environment
 
 import networkx as nx
 import os
 
+
+
+logger = LoggerSingleton().get_logger()
 
 class DijkstraAlgorithm(Algorithm):
     def __init__(self, env: Environment, config: ConfigSingleton):
@@ -14,6 +19,7 @@ class DijkstraAlgorithm(Algorithm):
         self.algo = 'Dijkstra'
 
     def preprocess(self):
+        logger.info(f"Preprocessing...")
         self.tag = "_".join(str(value) for value in self.config.tags.values())
         self.route_file = os.path.join(self.config.output_path, f"routes_{self.algo}_{self.tag}.txt")
         if self.config.tags.get('shelter_tag')=='zz':
@@ -23,13 +29,14 @@ class DijkstraAlgorithm(Algorithm):
         self.start_nodes = [node for node, data in self.env.G.nodes(data=True) if data.get('node_code') == 1283.0]
 
     def run(self):
+        logger.info(f"Start {self.algo} Algorithm...")
         graph = self.env.G
 
         paths = dict()
-        best_route = None
-        best_route_weight = float('inf')
-
         for start in self.start_nodes:
+            logger.debug(f"Start from node{start}")
+            best_route = None
+            best_route_weight = float('inf')
             for end in self.end_nodes:
                 if (start, end) in paths.keys():
                     path_weight = paths[(start, end)]['weight']
@@ -42,11 +49,11 @@ class DijkstraAlgorithm(Algorithm):
                 if best_route_weight > path_weight:
                     best_route_weight = path_weight
                     best_route = path
-
-        route = convert_path_to_coordinates(G=graph, path=best_route)
-        save_routes(start_coords=self.env.G.nodes[start].get('pos'), route=route, file_path=self.route_file)
+            route = convert_path_to_coordinates(G=graph, path=best_route)
+            save_routes(start_coords=self.env.G.nodes[start].get('pos'), route=route, file_path=self.route_file)
 
     def postprocess(self):
+        logger.info(f"Postprocessing...")
         format_routes(self.route_file)
 
         
@@ -69,29 +76,5 @@ def plan_Dijkstra(G, start, end):
         # 如果没有路径
         return None, float("inf")
 
-
-def convert_path_to_coordinates(G, path, start_coords=None, end_coords=None):
-    """
-    将路径中的节点ID转换为坐标点，并插入起点和终点的坐标
-    :param G: networkx 图
-    :param path: 由节点ID组成的路径
-    :param start_coords: 起点坐标，若为 None，则不插入
-    :param end_coords: 终点坐标，若为 None，则不插入
-    :return: 路径对应的坐标点列表
-    """
-    if path is None or len(path)==0:
-        return None
-    coordinates = []
-    # 如果有起点坐标，则先加入起点坐标
-    if start_coords:
-        coordinates.append(start_coords)
-    # 遍历路径中的每个节点，获取其坐标
-    for node in path:
-        if node in G.nodes:
-            coordinates.append(G.nodes[node].get('pos'))  # 假设坐标保存在 'pos' 属性中
-    # 如果有终点坐标，则加入终点坐标
-    if end_coords:
-        coordinates.append(end_coords)
-    return coordinates
 
 

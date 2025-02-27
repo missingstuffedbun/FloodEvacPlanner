@@ -61,10 +61,10 @@ class RouteVisualizationTask(Task):
         route_file = self.context.algo.route_file if self.context.algo else os.path.join(self.context.config.project_path, self.context.config.tasks.get('VIS_ROUTE'))
         routes = load_routes(route_file)
         environment_layer = EnvironmentLayer(self.context.env)
-        G = self.context.env.flooded_graph if self.context.env.flooded_graph else self.context.env.graph
+        G = self.context.env.flooded_graph if self.context.env.flooded_graph else f"{self.context.env.graph}_env"
         graph_layer = GraphLayer(G=G)
         route_layer = RouteLayer(routes=routes)
-        output_name = self.context.algo.route_file if self.context.algo else None
+        output_name = self.context.algo.route_file if self.context.algo else self.context.config.task_id
         vis = Visualize(environment_layer=environment_layer, graph_layer=graph_layer, route_layer=route_layer, output_name=output_name)
         vis.plot()
         super().execute(context)

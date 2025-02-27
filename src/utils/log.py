@@ -25,7 +25,7 @@ class LoggerSingleton:
 
         # 控制台输出
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
+        console_handler.setLevel(logging.DEBUG)
         console_handler.setFormatter(log_formatter)
         logger.addHandler(console_handler)
 

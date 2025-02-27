@@ -167,6 +167,13 @@ class RouteLayer:
                 scatter = ax.scatter(route[-1][0], route[-1][1], color='green', label='Shelter', alpha=0.4, s=10, zorder=22)
                 self.handlers.append(scatter)
 
+        if self.route_tree is not None:
+            print(self.route_tree)
+            for start, end in self.route_tree.items():
+                start_x, start_y = start
+                end_x, end_y = end
+                plt.plot([start_x, end_x], [start_y, end_y], marker='o')  # 绘制线段，并标记节点
+
 
 # 可视化类
 class Visualize:
