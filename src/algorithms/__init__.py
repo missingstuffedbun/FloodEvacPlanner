@@ -39,10 +39,13 @@ def convert_tree_to_coords(G, route_tree):
     :param route_tree: 存储节点父节点关系的树结构
     :return: 一个字典，包含节点坐标（键）及其父节点坐标（值）
     """
-    coords_tree = {}  # 用来存储节点坐标
-    for node, parent in route_tree.items():
-        node_coord = G.nodes[node].get('pos')  # 获取节点的坐标
-        parent_coord = G.nodes[parent].get('pos') if parent else None  # 获取父节点的坐标，根节点的父节点为 None
-        coords_tree[node_coord] = parent_coord  # 直接将节点坐标和父节点坐标关联
-    return coords_tree
+    coords_tree_dict = {}
+    for start, tree in route_tree.items():
+        coords_tree = {}  # 用来存储节点坐标
+        for node, parent in route_tree.items():
+            node_coord = G.nodes[node].get('pos')  # 获取节点的坐标
+            parent_coord = G.nodes[parent].get('pos') if parent else None  # 获取父节点的坐标，根节点的父节点为 None
+            coords_tree[node_coord] = parent_coord  # 直接将节点坐标和父节点坐标关联
+        coords_tree_dict[start] = coords_tree
+    return coords_tree_dict
 

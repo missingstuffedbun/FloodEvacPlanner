@@ -32,11 +32,13 @@ class RRTAlgorithm(Algorithm):
 
     def run(self):
         logger.info(f"Start {self.algo} Algorithm...")
+        route_tree_dict = {}
         for start in self.start_nodes:
             logger.debug(f"Start from node {start}")
             route, route_tree = self.plan_RRT(G=self.env.G, start=start, ends=self.end_nodes, max_iterations=500)
             save_routes(start_coords=start, route=convert_path_to_coordinates(route), file_path=self.route_file)
-            save_route_tree(start_coords=start, route_tree=convert_tree_to_coords(route_tree), file_path=self.routetree_file)
+            route_tree_dict[start] = route_tree
+        save_route_tree(route_tree=convert_tree_to_coords(route_tree), file_path=self.routetree_file)
 
     def plan_RRT(self, G, start=None, ends=None, max_iterations=1000):
         """

@@ -165,11 +165,12 @@ class RouteLayer:
                 self.handlers.append(scatter)
 
         if self.route_tree is not None:
-            logger.info(f"Plot Route Layer: route tree")
-            for start, end in self.route_tree.items():
-                start_x, start_y = start
-                end_x, end_y = end
-                plt.plot([start_x, end_x], [start_y, end_y], marker='o')  # 绘制线段，并标记节点
+            for node, tree in self.route_tree.items():
+                logger.info(f"Plot Route Layer: route tree {node}")
+                for start, end in tree.items():
+                    start_x, start_y = start
+                    end_x, end_y = end
+                    plt.plot([start_x, end_x], [start_y, end_y], marker='o')  # 绘制线段，并标记节点
 
 
 # 可视化类

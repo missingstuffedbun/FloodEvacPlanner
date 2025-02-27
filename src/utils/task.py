@@ -70,6 +70,27 @@ class RouteVisualizationTask(Task):
         super().execute(context)
 
 
+class RouteTreeVisualizationTask(Task):
+    def execute(self, context: TaskContext):
+        from src.utils.visualize import Visualize, EnvironmentLayer, GraphLayer, RouteLayer
+        from src.algorithms.routes import load_route_tree
+        import os
+
+        route_file = self.context.algo.routetree_file if self.context.algo else os.path.join(self.context.config.project_path, self.context.config.tasks.get('VIS_TREE'))
+        route_tree = load_route_tree(route_file)
+        environment_layer = EnvironmentLayer(self.context.env)
+        G = self.context.env.flooded_graph if self.context.env.flooded_graph else f"{self.context.env.graph}_env"
+        graph_layer = GraphLayer(G=G, plot_set=['edges'])
+        for node, tree in route_tree.items():
+            route_layer = RouteLayer(route_tree=route_tree)
+            output_name = self.context.algo.routetree_file if self.context.algo else self.context.config.task_id
+            output_name = f"{output_name}_{node}"
+            vis = Visualize(environment_layer=environment_layer, graph_layer=graph_layer, route_layer=route_layer, output_name=output_name)
+            vis.plot()
+        super().execute(context)
+
+
+
 class EnvVisualizationTask(Task):
     def execute(self, context: TaskContext):
         from src.utils.visualize import Visualize, EnvironmentLayer, GraphLayer
@@ -83,11 +104,14 @@ class EnvVisualizationTask(Task):
         super().execute(context)
 
 
+
+
 TASK_MAPPING = {
     'LOAD_ENV': LoadEnvironmentTask,
     'VIS_ENV': EnvVisualizationTask,
     'RUN_ALGO': PathPlanningTask,
     'VIS_ROUTE': RouteVisualizationTask,
+    'VIS_TREE': RouteTreeVisualizationTask,
 }
 
 # 根据配置动态生成任务链
