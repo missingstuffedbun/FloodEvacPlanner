@@ -34,7 +34,7 @@ class DijkstraAlgorithm(Algorithm):
 
         paths = dict()
         for start in self.start_nodes:
-            logger.debug(f"Start from node{start}")
+            logger.debug(f"Start from node {start}")
             best_route = None
             best_route_weight = float('inf')
             for end in self.end_nodes:

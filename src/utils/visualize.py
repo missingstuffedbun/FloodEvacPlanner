@@ -136,20 +136,17 @@ class GraphLayer:
 # 路径图层类
 class RouteLayer:
     def __init__(self, routes=None, route_tree=None):
-        if routes:
-            self.routes = routes
-            self.route_number = len(routes)
-        elif route_tree:
-            self.route_tree = route_tree
-            self.route_number = 1
+        self.routes = routes if routes else None
+        self.route_tree = route_tree if route_tree else None
         self.handlers = []
-        logger.info(f"Plot Route Layer: {self.route_number} route(s)")
+
 
     def plot(self, ax=None):
         if ax is None:
             ax = plt.gca()
 
         if self.routes is not None:
+            logger.info(f"Plot Route Layer: {len(self.routes)} routes")
             colormap = cm.viridis  # 使用 viridis colormap
             ends_set = set([route[-1] for route in self.routes])  # 终点数量
             ends_colors = [colormap(i / len(ends_set)) for i in range(len(ends_set))]  # 为不同终点路径分配不同的颜色
@@ -168,7 +165,7 @@ class RouteLayer:
                 self.handlers.append(scatter)
 
         if self.route_tree is not None:
-            print(self.route_tree)
+            logger.info(f"Plot Route Layer: route tree")
             for start, end in self.route_tree.items():
                 start_x, start_y = start
                 end_x, end_y = end
