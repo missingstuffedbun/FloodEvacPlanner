@@ -20,7 +20,7 @@ class RRTAlgorithm(Algorithm):
 
     def preprocess(self, **kwargs):
         logger.info(f"Preprocessing...")
-        self.tag = "_".join(str(value) for value in self.config.tags.values())
+        self.tag = self.config.task_id
         self.route_file = os.path.join(self.config.output_path, f"routes_{self.algo}_{self.tag}.txt")
         self.routetree_file = os.path.join(self.config.output_path, f"routetree_{self.algo}_{self.tag}.json")
         if self.config.tags.get('shelter_tag')=='zz':

@@ -2,11 +2,13 @@ from abc import ABC, abstractmethod
 
 from src.utils.config import ConfigSingleton
 from src.utils.log import LoggerSingleton
+import os
 
 
 class TaskContext:
     def __init__(self, config=None, config_path=None, env=None, algo=None):
         self.config = ConfigSingleton(config_path).get_config() if config_path else config
+        self.config.save_config(os.path.join(self.config.output_path, 'config.yaml'))
         self.env = env
         self.algo = algo
         self.logger = LoggerSingleton(task_id=self.config.task_id, logs_path=self.config.logs_path)

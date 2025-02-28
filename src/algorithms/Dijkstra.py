@@ -20,7 +20,7 @@ class DijkstraAlgorithm(Algorithm):
 
     def preprocess(self):
         logger.info(f"Preprocessing...")
-        self.tag = "_".join(str(value) for value in self.config.tags.values())
+        self.tag = self.config.task_id
         self.route_file = os.path.join(self.config.output_path, f"routes_{self.algo}_{self.tag}.txt")
         if self.config.tags.get('shelter_tag')=='zz':
             self.end_nodes = [node for node, data in self.env.G.nodes(data=True) if data.get('node_code') == 8.0]

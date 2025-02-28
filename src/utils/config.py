@@ -22,8 +22,14 @@ class ConfigSingleton:
         self.config = self.load_config(config_file_path)
 
         # 提取常用配置项
-        self.task_id = self.config.get('tasks_id', datetime.now().strftime('%Y%m%d%H%M%S'))
-        self.tasks = self.config.get('tasks', {})
+        self.tags = self.config.get('tags', None)
+        self.task_id = self.config.get(
+            'tasks_id',
+            datetime.now().strftime('%Y%m%d%H%M%S') if self.tags is None else "_".join(str(value) for value in self.config.tags.values())
+        )
+        self.tasks = self.config.get('tasks', None)
+        if self.tasks is None:
+            raise ValueError("tasks must be provided in the configuration file")
         
         self.project_path = os.path.abspath(self.config.get('project_path', '../..'))
         self.logs_path = os.path.join(self.project_path, self.config.get('logs_path', 'logs'))
@@ -39,7 +45,7 @@ class ConfigSingleton:
         self.random_seed = self.config.get('random_seed', 2025)
         random.seed(self.random_seed)
         
-        self.tags = self.config.get('tags', {})
+
 
         
 
@@ -71,3 +77,10 @@ class ConfigSingleton:
         """返回已初始化的logger"""
         return self._instance
 
+
+    def save_config(self, file_path):
+        """
+        保存配置文件
+        """
+        with open(file_path, 'w') as file:
+            yaml.dump(self.config, file)
