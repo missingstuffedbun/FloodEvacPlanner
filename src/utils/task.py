@@ -106,6 +106,25 @@ class EnvVisualizationTask(Task):
         super().execute(context)
 
 
+class RouteAnalysisTask(Task):
+    def execute(self, context: TaskContext):
+        from src.algorithms.routes import load_routes
+        from src.envs.graph import route_stats_with_graph, congestion_level_analysis
+        import networkx as nx
+
+        if self.context.config.tasks.get('ANAL_ROUTE') is True:
+            route_file = self.context.algo.route_file if self.context.algo else os.path.join(self.context.config.project_path, self.context.config.tasks.get('ANAL_ROUTE'))
+        else:
+            route_file = self.context.config.tasks.get('ANAL_ROUTE')
+        routes = load_routes(route_file)
+        G, route_stats = route_stats_with_graph(self.context.env.graph, routes)
+        nx.write_gml(G, os.path.join(self.context.config.output_path, 'graph_route.gml'))
+        route_stats.to_csv(os.path.join(self.context.config.output_path, 'route_stats.csv'), index=False)
+        congestion_levels = congestion_level_analysis(G, bins=4)
+        congestion_levels.to_csv(os.path.join(self.context.config.output_path, 'congestion_levels.csv'), index=False)
+
+
+
 
 
 TASK_MAPPING = {
@@ -114,6 +133,7 @@ TASK_MAPPING = {
     'RUN_ALGO': PathPlanningTask,
     'VIS_ROUTE': RouteVisualizationTask,
     'VIS_TREE': RouteTreeVisualizationTask,
+    'ANAL_ROUTE': RouteAnalysisTask,
 }
 
 # 根据配置动态生成任务链
