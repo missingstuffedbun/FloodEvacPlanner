@@ -61,6 +61,7 @@ class RouteVisualizationTask(Task):
         import os
 
         route_file = self.context.algo.route_file if self.context.algo else os.path.join(self.context.config.project_path, self.context.config.tasks.get('VIS_ROUTE'))
+        self.context.route_file = route_file
         routes = load_routes(route_file)
         environment_layer = EnvironmentLayer(self.context.env)
         G = self.context.env.flooded_graph if self.context.env.flooded_graph else f"{self.context.env.graph}_env"
@@ -79,6 +80,7 @@ class RouteTreeVisualizationTask(Task):
         import os
 
         route_file = self.context.algo.routetree_file if self.context.algo else os.path.join(self.context.config.project_path, self.context.config.tasks.get('VIS_TREE'))
+        self.context.route_file = route_file
         route_tree = load_route_tree(route_file)
         environment_layer = EnvironmentLayer(self.context.env)
         G = self.context.env.flooded_graph if self.context.env.flooded_graph else f"{self.context.env.graph}_env"
@@ -111,18 +113,18 @@ class RouteAnalysisTask(Task):
         from src.algorithms.routes import load_routes
         from src.envs.graph import route_stats_with_graph, congestion_level_analysis
         import networkx as nx
-
         if self.context.config.tasks.get('ANAL_ROUTE') is True:
-            route_file = self.context.algo.route_file if self.context.algo else os.path.join(self.context.config.project_path, self.context.config.tasks.get('ANAL_ROUTE'))
+            route_file = self.context.route_file
         else:
-            route_file = self.context.config.tasks.get('ANAL_ROUTE')
+            os.path.join(self.context.config.output_path, self.context.config.tasks.get('ANAL_ROUTE'))
+        if route_file is None:
+            raise ValueError("Route file (route_file) is required for RouteAnalysisTask.")
         routes = load_routes(route_file)
         G, route_stats = route_stats_with_graph(self.context.env.graph, routes)
         nx.write_gml(G, os.path.join(self.context.config.output_path, 'graph_route.gml'))
         route_stats.to_csv(os.path.join(self.context.config.output_path, 'route_stats.csv'), index=False)
         congestion_levels = congestion_level_analysis(G, bins=4)
         congestion_levels.to_csv(os.path.join(self.context.config.output_path, 'congestion_levels.csv'), index=False)
-
 
 
 

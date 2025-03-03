@@ -124,13 +124,12 @@ def route_stats_with_graph(G, routes):
     route_stats = []  # 存储每条路径的统计信息
 
     # 创建一个坐标到节点的映射字典
-    pos_to_node = {v['pos']: node for node, v in G.nodes(data=True)}
-
+    pos_to_node = {tuple(attr['pos']): node for node, attr in G.nodes(data=True)}
     for route in routes:
         # 1. 把路径中的每个坐标转换成节点（list of nodes）
         node_route = []
         for coords in route:
-            node = pos_to_node.get(coords)
+            node = pos_to_node.get(tuple(coords))
             if node is not None:
                 node_route.append(node)
             else:
@@ -151,11 +150,10 @@ def route_stats_with_graph(G, routes):
                 start_node = node_route[i - 1]
                 end_node = node_route[i]
 
-
                 # 计算路径权重（edge weight）
                 edge_weight = G[start_node][end_node].get(
                     'weight',
-                    np.linalg.norm(np.array(start_node.get('pos')) - np.array(end_node.get('pos')))
+                    np.linalg.norm(np.array(G.nodes(data=True)[start_node].get('pos')) - np.array(G.nodes(data=True)[end_node].get('pos')))
                 )
                 route_weight += edge_weight
 
@@ -183,7 +181,7 @@ def route_stats_with_graph(G, routes):
     return G, df
 
 
-def congestion_level_analysis(G, bins=5):
+def congestion_level_analysis(G, bins=4):
     # 获取所有边的属性转换为 DataFrame
     df = pd.DataFrame(G.edges(data=True), columns=['start_node', 'end_node', 'attributes'])
 
@@ -205,8 +203,7 @@ def congestion_level_analysis(G, bins=5):
     logger.info(f"Ratio 的标准差: {ratio_std:.4f}")
 
     # 使用 pd.qcut 按分位数进行分箱
-    bin_labels = [f'Bin {i + 1}' for i in range(bins)]  # 分箱标签
-    df['bin'] = pd.qcut(df['ratio'], q=bins, labels=bin_labels)  # 按 ratio 列进行分箱，并赋予标签
+    df['bin'] = pd.qcut(df['ratio'], q=bins, duplicates='drop')  # 按 ratio 列进行分箱，并赋予标签
     # 分箱统计分析
     bin_stats = df.groupby('bin')['ratio'].agg(['mean', 'std', 'min', 'max', 'count'])
     bin_stats.columns = ['Bin Mean', 'Bin Std', 'Bin Min', 'Bin Max', 'Bin Count']

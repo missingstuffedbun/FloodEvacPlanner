@@ -6,11 +6,11 @@ logs_path: 'logs'
 
 tasks_id: '720_plan'
 tasks: 
-#  LOAD_ENV: true
+  LOAD_ENV: true
 #  VIS_ENV: true
 #  RUN_ALGO: 'Dijkstra'
-  VIS_ROUTE: true
-  ANALYZE_ROUTE: true
+  VIS_ROUTE: 'output\test\routes_Dijkstra_720_plan.txt'
+  ANAL_ROUTE: true
 
 shp_files:
   map: 'map01.shp'

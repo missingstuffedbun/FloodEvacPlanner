@@ -25,7 +25,7 @@ class ConfigSingleton:
         self.tags = self.config.get('tags', None)
         self.task_id = self.config.get(
             'tasks_id',
-            datetime.now().strftime('%Y%m%d%H%M%S') if self.tags is None else "_".join(str(value) for value in self.config.tags.values())
+            datetime.now().strftime('%Y%m%d%H%M%S') if self.tags is None else "_".join(str(value) for value in self.tags.values())
         )
         self.tasks = self.config.get('tasks', None)
         if self.tasks is None:
