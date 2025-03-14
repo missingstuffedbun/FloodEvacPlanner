@@ -29,28 +29,35 @@ input_path: Directory containing the input data (e.g., shapefiles, GML files).
 output_path: Directory where output files (e.g., simulation results, visualizations) will be saved.
 logs_path: Directory for log files.
 
-tasks_id: 
-- LOAD_ENV: Set to true to load the environment configuration.
-- VIS_ENV: Visualize the environment data. 
-- RUN_ALGO: The algorithm to use for route planning. Choose from the following options: **Dijkstra**, **RRT**. 
-- VIS_ROUTE: Set to true to visualize the route (use route_path from the task or provide a custom file path)
-- ANAL_ROUTE: Set to true if you want to analyze the evacuation route.
+tasks_id: # A list of tasks to execute when running the code.
+  - LOAD_ENV: Set to true to load the environment configuration. This step is mandatory.
+  - VIS_ENV: Visualize the environment data.
+  - RUN_ALGO: The algorithm to use for route planning. Choose from the following options: **Dijkstra**, **RRT**.
+  - VIS_ROUTE: Set to true to visualize the route (generated `route_path` in previous tasks) or provide a custom route file path.
+  - ANAL_ROUTE: Set to true to analyze the evacuation route or provide a custom route file path.
 
-shp_files:
-- map: The map of the flood scenario (e.g., map01.shp).
-- buildings: Shapefile with building data (e.g., building01.shp).
-- rivers: Shapefile with river data (e.g., river01.shp).
-- floods:
-- roads: The roads network shapefile (e.g., network03_v2.shp).
-- road_nodes: The road nodes data (e.g., network_node04.shp).
+shp_files: # These are the raw data files located in the `input_path` directory.
+  - map: The map of the research area (usually the boundary of a city).
+  - buildings: Shapefile containing building polygons.
+  - rivers: Shapefile containing river polygons.
+  - floods: Shapefile containing flood area polygons, aligned with `flood_tag`.
+  - roads: Shapefile containing the road network.
+  - road_nodes: Shapefile containing road nodes, including start points (usually underground spaces), end points (usually shelters), and intersections.
 
-gml_files: 
-- graph: The initial graph used for routing (e.g., graph_0.gml).
-- flooded_graph: The graph after flooding, which aligns with the flood data (e.g., graph_720.gml).
+gml_files: # Generated from `shp_files` to accelerate computation. If not available, they will be created.
+  - graph: Roads and nodes data from `shp_files`.
+  - flooded_graph: Roads and nodes data in a flooded environment (aligned with the `floods`). 
 
-tags
-- flood_tag: A tag to match the flood data with the task (e.g., 720).
-- shelter_tag: A tag for identifying shelters in the evacuation plan (e.g., zz).
+tags:
+  - flood_tag: A tag to match the flood data with the task.
+  - shelter_tag: A tag for identifying shelters in the evacuation plan.
 
-random_seed: The seed value for random number generation to ensure reproducibility of the results (e.g., 2025).
+random_seed: The seed value for random number generation to ensure reproducibility of the results.
 ```
+
+
+### Data Description
+
+- **floods & rivers** do not overlap. If there is any overlapping area, remove the overlapping portion from `floods`.
+- **roads & road_nodes** are topological data. `roads` includes classification codes to identify different road types; `road_nodes` also contains node classifications, with `shelter_tag` used to identify selectable nodes (such as shelters).
+- **graph & flooded_graph**: If gml files exist, the system will directly use these files to compute the route. Otherwise, gml files will be generated from `shp_files` and then used for route calculation.

@@ -4,12 +4,12 @@ input_path: 'input'
 output_path: 'output'
 logs_path: 'logs'
 
-tasks_id: '720_plan'
+tasks_id: '720_zz'
 tasks: 
   LOAD_ENV: true
 #  VIS_ENV: true
 #  RUN_ALGO: 'Dijkstra'
-  VIS_ROUTE: 'output\test\routes_Dijkstra_720_plan.txt'
+  VIS_ROUTE: 'output\test\routes_Dijkstra_720_zz.txt'
   ANAL_ROUTE: true
 
 shp_files:
@@ -27,6 +27,6 @@ gml_files:
 
 tags:
   flood_tag: '720' # align with floods
-  shelter_tag: 'plan' # plan / zz
+  shelter_tag: 'zz' # plan / zz
 
 random_seed: 2025
