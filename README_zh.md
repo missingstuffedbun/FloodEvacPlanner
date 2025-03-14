@@ -1,5 +1,5 @@
 # FloodEvacPlanner
-- [English README](README_en.md)
+- [English README](README.md)
 - [中文 README](README_zh.md)
 
 ## 项目简介

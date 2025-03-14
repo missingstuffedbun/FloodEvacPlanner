@@ -1,5 +1,5 @@
 # FloodEvacPlanner
-- [English README](README_en.md)
+- [English README](README.md)
 - [中文 README](README_zh.md)
 
 FloodEvacPlanner is an path planning algorithm and simulation system for evacuation planning in flood scenarios. 
