@@ -1,11 +1,13 @@
 # FloodEvacPlanner
+- [English README](README_en.md)
+- [中文 README](README_zh.md)
 
 FloodEvacPlanner is an path planning algorithm and simulation system for evacuation planning in flood scenarios. 
 The system integrates various algorithms to optimize escape routes and plans, aiming to assess and improve the efficiency and safety of evacuation processes during floods.
 
-## Usage
+# Usage
 
-### Running the Code
+## Running the Code
 1. Clone the repo
 ```bash
 git clone https://github.com/missingstuffedbun/FloodEvacPlanner.git
@@ -20,7 +22,7 @@ pip install -r requirements.txt
 python main.py -c config.yaml
 ```
 
-### Configuration File
+## Configuration File
 
 The project uses a YAML configuration file to customize the evacuation planning tasks. The configuration file allows you to specify parameters for the flood scenario, routing algorithms, and other settings. Below is an example of the `config.yaml` file:
 ```yaml
@@ -56,7 +58,7 @@ random_seed: The seed value for random number generation to ensure reproducibili
 ```
 
 
-### Data Description
+## Data Description
 
 - **floods & rivers** do not overlap. If there is any overlapping area, remove the overlapping portion from `floods`.
 - **roads & road_nodes** are topological data. `roads` includes classification codes to identify different road types; `road_nodes` also contains node classifications, with `shelter_tag` used to identify selectable nodes (such as shelters).

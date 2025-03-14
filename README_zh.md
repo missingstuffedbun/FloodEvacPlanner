@@ -1,3 +1,7 @@
+# FloodEvacPlanner
+- [English README](README_en.md)
+- [中文 README](README_zh.md)
+
 ## 项目简介
 FloodEvacPlanner是一个学术研究项目，旨在为洪灾情境下的疏散规划提供优化解决方案。
 该项目支持将 GIS 导出的 SHP 文件作为输入，更加适合非计算机专业同学的需求。
