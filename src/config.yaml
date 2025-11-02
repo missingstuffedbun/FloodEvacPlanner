@@ -9,8 +9,8 @@ tags:
   crash_tag: 'low'
   traffic_tag: 'wd_am_off_peak'
   algo1: 'RL'
-  algo2: 'Dij'
-  algo3: 'Dij'
+  algo2: 'astar'              # dijkstra, astar
+  algo3: 'multi-dijkstra'     # multi-dijkstra, rrt-prm
 
 files:
   edges_all: 'Edges.shp'
@@ -23,5 +23,5 @@ params:
   crash_ratio: 0.1 # align with crash_tag
   max_ped: 5000
   max_shelter: 3000
-  max_try: 10
   random_seed: 2025
+  sample_size: 200
