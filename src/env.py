@@ -30,6 +30,9 @@ class Environment:
         self.shelter_points = gpd.read_file(os.path.join(config['project_path'], config['input_path'], config['files']['shelter']))
         # 初始化图
         self.G = self._build_graph()
+        self.G_vehicle = nx.subgraph_view(self.G, filter_edge=lambda u, v, d: d.get('car_access', True))
+        G_pedestrian = nx.subgraph_view(self.G, filter_edge=lambda u, v, d: not d.get('flooded', False))
+        self.G_pedestrian = G_pedestrian.to_undirected(as_view=True)
         print('Graph loaded.')
 
 
@@ -38,6 +41,7 @@ class Environment:
         edges_df = self.edges_all.copy()
         edges_df['start'] = edges_df.geometry.apply(lambda g: g.coords[0])
         edges_df['end'] = edges_df.geometry.apply(lambda g: g.coords[-1])
+        edges_df['weight'] = edges_df['Shape_Leng']
 
         # 自动保留所有列（除了 geometry）作为 edge_attr
         edge_attr_cols = [col for col in edges_df.columns if col not in ['start', 'end', 'geometry']]
@@ -74,6 +78,8 @@ class Environment:
                 pass
 
         G = self._mark_shelters(G)
+        self.shelters = [n for n, attr in G.nodes(data=True) if attr.get('shelter', False)]
+
         G = self._mark_crash(G)
 
         return G
@@ -88,7 +94,6 @@ class Environment:
 
         node_coords = np.array(list(G.nodes))
         tree = cKDTree(node_coords)
-
         for pt in self.shelter_points.geometry:
             _, idx = tree.query([pt.x, pt.y])
             nearest_node = tuple(node_coords[idx])
@@ -121,5 +126,4 @@ class Environment:
             nearest_node = tuple(node_coords[idx])
             G.nodes[nearest_node]['crash'] = True
         return G
-
 

@@ -4,29 +4,24 @@ input_path: 'input'
 output_path: 'output'
 logs_path: 'logs'
 
-tasks_id: '720_zz'
-tasks: 
-  LOAD_ENV: true
-#  VIS_ENV: true
-#  RUN_ALGO: 'Dijkstra'
-  VIS_ROUTE: 'output\test\routes_Dijkstra_720_zz.txt'
-  ANAL_ROUTE: true
-
-shp_files:
-  map: 'map01.shp'
-  buildings: 'building01.shp'
-  rivers: 'river01.shp'
-  floods: '720yy.shp' # align with flood_tag
-
-  roads: 'network03_v2.shp'
-  road_nodes: 'network_node04.shp'
-
-gml_files:
-  graph: 'graph_0.gml'
-  flooded_graph: 'graph_720.gml' # align with floods
-
 tags:
-  flood_tag: '720' # align with floods
-  shelter_tag: 'zz' # plan / zz
+  flood_tag: '1974'
+  crash_tag: 'low'
+  traffic_tag: 'wd_am_off_peak'
+  algo1: 'RL'
+  algo2: 'Dij'
+  algo3: 'Dij'
 
-random_seed: 2025
+files:
+  edges_all: 'Edges.shp'
+  edges_flood: 'edges_197401.shp' # align with flood_tag
+  crash: 'crash.shp'
+  traffic: 'destinations_wd_am_off_peak.shp' # align with traffic_tag
+  shelter: 'shelter_snap.shp'
+
+params:
+  crash_ratio: 0.1 # align with crash_tag
+  max_ped: 5000
+  max_shelter: 3000
+  max_try: 10
+  random_seed: 2025

@@ -41,22 +41,17 @@ class Agent:
         self.origin = origin
         self.destination = destination
         self.current_node = origin
-        self.route = []          # 当前规划路线（节点列表）
-        self.mode = 'vehicle'    # 当前移动方式：'vehicle' 或 'pedestrian'
         self.reached_destination = False
         self.reached_shelter = False
         self.failed = False      # 不再继续进行
-        self.history = []        # 记录每一步节点，用于可视化或统计 {mode, route, exec_route}
+        self.history = []        # 记录每一步节点，用于可视化或统计 {mode, exec_route, stop_sig}
         self.attempts = 0        # 尝试重新规划次数（针对 shelter）
 
+    def add_history(self, mode, exec_route, stop_sig):
+        self.history.append({'mode':mode, 'exec_route':exec_route, 'stop_sig':stop_sig})
 
-    def plan_route(self):
-        # 调用 Planner 计算 route（vehicle/pedestrian/shelter）
-        pass
+    def add_attempts(self):
+        self.attempts += 1
 
-    def execute_route(self):
-        pass
-
-    def is_finished(self):
-        # 返回是否已经到达 destination/shelter/失败
-        pass
+    def __getattribute__(self, __name):
+        return super().__getattribute__(__name)
