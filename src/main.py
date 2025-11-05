@@ -1,5 +1,5 @@
 from environment import Environment
-from config_manager import init_config
+from config_manager import init_config, get_config
 from agent import AgentFactory
 from src.planner import Planner
 import numpy as np
@@ -29,20 +29,25 @@ if __name__ == "__main__":
     # 配置 YAML 文件路径
     config_file = "config.yaml"
     init_config(config_file)
+    config = get_config()
 
     env = Environment()
     planner = Planner(env)
 
     factory = AgentFactory()
     agents = factory.create_agents()
+
     for agent in agents:
         # -------- 阶段一：开车 ----------
-        route, stop_node_id, stop_sig = planner.plan_vehicle(agent.origin, agent.destination)
-        agent.current_node = route[stop_node_id]
-        agent.history.append('vehicle', route[:stop_node_id+1], stop_sig)
-        if stop_sig:
-            agent.reached_destination = True
-            continue
+        max_replan = config['params']['max_replan']
+        while not agent.reached_destination and max_replan > 0:
+            route, stop_node_id, stop_sig = planner.plan_vehicle(agent.origin, agent.destination)
+            agent.current_node = route[stop_node_id]
+            agent.history.append('vehicle', route[:stop_node_id+1], stop_sig)
+            max_replan -= 1
+            if stop_sig:
+                agent.reached_destination = True
+                break
 
         if destination_or_shelter(agent.current_node, agent.destination, agent.shelters) == 'destination':
             # -------- 阶段二：步行到原 destination ----------

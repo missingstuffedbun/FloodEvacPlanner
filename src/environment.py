@@ -41,7 +41,6 @@ class Environment:
         edges_df = self.edges_all.copy()
         edges_df['start'] = edges_df.geometry.apply(lambda g: g.coords[0])
         edges_df['end'] = edges_df.geometry.apply(lambda g: g.coords[-1])
-        edges_df['weight'] = edges_df['Shape_Leng']
 
         # 自动保留所有列（除了 geometry）作为 edge_attr
         edge_attr_cols = [col for col in edges_df.columns if col not in ['start', 'end', 'geometry']]

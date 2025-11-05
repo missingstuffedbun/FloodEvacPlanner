@@ -1,3 +1,5 @@
+import json
+
 from config_manager import get_config
 import geopandas as gpd
 import os
@@ -47,11 +49,11 @@ class Agent:
         self.history = []        # 记录每一步节点，用于可视化或统计 {mode, exec_route, stop_sig}
         self.attempts = 0        # 尝试重新规划次数（针对 shelter）
 
+    def __getattribute__(self, __name):
+        return super().__getattribute__(__name)
+
     def add_history(self, mode, exec_route, stop_sig):
         self.history.append({'mode':mode, 'exec_route':exec_route, 'stop_sig':stop_sig})
 
     def add_attempts(self):
         self.attempts += 1
-
-    def __getattribute__(self, __name):
-        return super().__getattribute__(__name)

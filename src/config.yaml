@@ -8,9 +8,14 @@ tags:
   flood_tag: '1974'
   crash_tag: 'low'
   traffic_tag: 'wd_am_off_peak'
-  algo1: 'RL'
+
+algos:
+  algo1: 'dijkstra'           # dijkstra, astar
   algo2: 'astar'              # dijkstra, astar
   algo3: 'multi-dijkstra'     # multi-dijkstra, rrt-prm
+  weight1: 'time'             # time, length
+  weight2: 'length'           # time, length
+  weight3: 'length'           # time, length
 
 files:
   edges_all: 'Edges.shp'
@@ -20,8 +25,9 @@ files:
   shelter: 'shelter_snap.shp'
 
 params:
-  crash_ratio: 0.1 # align with crash_tag
+  crash_ratio: 0.1            # align with crash_tag
   max_ped: 5000
   max_shelter: 3000
   random_seed: 2025
   sample_size: 200
+  max_replan: 10
