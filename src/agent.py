@@ -25,8 +25,8 @@ class AgentFactory:
     def _parse_traffic(self):
         origins_np = self.traffic[['ORIGIN_X', 'ORIGIN_Y']].to_numpy()
         destinations_np = self.traffic.geometry.apply(lambda p: (p.x, p.y)).to_numpy()
-        origins = [tuple(x) for x in origins_np]
-        destinations = [tuple(x) for x in destinations_np]
+        origins = [tuple(float(_) for _ in x) for x in origins_np]
+        destinations = [tuple(float(_) for _ in x) for x in destinations_np]
         return origins, destinations
 
     def create_agents(self):
@@ -35,7 +35,6 @@ class AgentFactory:
             agent = Agent(agent_id=i, origin=origin, destination=destination)
             agents.append(agent)
         return agents
-
 
 class Agent:
     def __init__(self, agent_id, origin, destination):
@@ -57,3 +56,7 @@ class Agent:
 
     def add_attempts(self):
         self.attempts += 1
+
+    def save_history(self, output_file):
+        with open(output_file, 'a') as f:
+            f.write(json.dumps(self.history) + "\n")

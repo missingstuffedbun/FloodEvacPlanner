@@ -30,9 +30,12 @@ class Environment:
         self.shelter_points = gpd.read_file(os.path.join(config['project_path'], config['input_path'], config['files']['shelter']))
         # 初始化图
         self.G = self._build_graph()
-        self.G_vehicle = nx.subgraph_view(self.G, filter_edge=lambda u, v, d: d.get('car_access', True))
-        G_pedestrian = nx.subgraph_view(self.G, filter_edge=lambda u, v, d: not d.get('flooded', False))
+        self.G_vehicle = nx.subgraph_view(self.G, filter_edge=lambda u, v: self.G[u][v].get('car_access', True))
+        G_pedestrian = nx.subgraph_view(self.G, filter_edge=lambda u, v: not self.G[u][v].get('flooded', False))
         self.G_pedestrian = G_pedestrian.to_undirected(as_view=True)
+
+        for n in self.G.nodes():
+            print(n)
         print('Graph loaded.')
 
 
@@ -125,4 +128,8 @@ class Environment:
             nearest_node = tuple(node_coords[idx])
             G.nodes[nearest_node]['crash'] = True
         return G
+
+    def get_shelters(self):
+        return [n for n, attr in self.G.nodes(data=True) if attr.get('shelter', False)]
+
 

@@ -1,3 +1,5 @@
+import os.path
+
 from environment import Environment
 from config_manager import init_config, get_config
 from agent import AgentFactory
@@ -67,4 +69,5 @@ if __name__ == "__main__":
                 continue
 
         agent.failed = True
+        agent.save_history(os.path.join(config.get('output_path'), config.get('timestamp'), 'history.txt'))
 

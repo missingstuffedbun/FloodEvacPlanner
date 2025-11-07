@@ -11,7 +11,7 @@ tags:
 
 algos:
   algo1: 'dijkstra'           # dijkstra, astar
-  algo2: 'dijkstra'           # dijkstra, astar
+  algo2: 'astar'              # dijkstra, astar
   algo3: 'multi-dijkstra'     # multi-dijkstra, rrt-prm
   weight1: 'time'             # time, length
   weight2: 'length'           # time, length

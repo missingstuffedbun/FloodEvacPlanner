@@ -1,4 +1,6 @@
 # config_manager.py
+import shutil
+from datetime import datetime
 import yaml
 import os
 
@@ -15,6 +17,18 @@ class Config:
         if not self._initialized:
             with open(path, 'r') as f:
                 self.data = yaml.safe_load(f)
+
+            # ---- 新增：创建带时间戳的输出文件夹 ----
+            base_output_path = self.data.get('output_path', 'output')
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            self.data['timestamp'] = timestamp
+            run_output_dir = os.path.join(base_output_path, timestamp)
+            os.makedirs(run_output_dir, exist_ok=True)
+
+            # ---- 复制 config 文件过去 ----
+            shutil.copy(path, os.path.join(run_output_dir, os.path.basename(path)))
+
+            # ---- 初始化完成标记 ----
             self._initialized = True
 
     def get(self, key, default=None):

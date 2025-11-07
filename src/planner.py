@@ -7,7 +7,7 @@ def compute_vehicle_weights(G):
         length = data.get('length', 0)
         speed = data.get('max_speed', 30)
         lane = data.get('lane', 2)
-        special = data.get('special_ro', '')
+        special = data.get('special_ro', None)
 
         flooded = G.nodes[u].get('flooded', False)
         crash = G.nodes[u].get('crash', False)
@@ -17,7 +17,7 @@ def compute_vehicle_weights(G):
         lane_penalty = 0.02 * max(lane - 2, 0)
         crash_penalty = 0.3 if crash else 0
         flood_penalty = 0.6 if flooded else 0
-        special_penalty = 0.1 if len(special)>1 else 0
+        special_penalty = 0.1 if special else 0
 
         vehicle_time = base_time * (1.0 + lane_penalty + crash_penalty + flood_penalty + special_penalty)
         vehicle_length = length * (1.0 + crash_penalty + flood_penalty)
@@ -35,12 +35,12 @@ def compute_pedestrian_weights(G):
             dist = ((u[0] - v[0])**2 + (u[1] - v[1])**2)**0.5
 
         # 属性惩罚
-        special = data.get('special_ro', '')
-        special_penalty = 0.3 if len(special)>1 else 0
+        special = data.get('special_ro', None)
+        special_penalty = 0.3 if special else 0
 
         # 附近高限速道路惩罚
         max_speed_penalty = 0
-        for nbr in G.successors(u):
+        for nbr in G.neighbors(u):
             edge_data = G.get_edge_data(u, nbr)
             if edge_data and edge_data.get('max_speed', 100) > 50:
                 max_speed_penalty = 0.2
@@ -70,31 +70,37 @@ class Planner:
 
 
     # -------- 阶段一：vehicle -----------
-    def plan_vehicle(self, start, end, algo='dijkstra'):
+    def plan_vehicle(self, start: tuple[float], end: tuple[float], algo: str='dijkstra'):
         key = (start, end, 'vehicle')
         if key in self.cache_vehicle:
             return self.cache_vehicle[key]
         route = self._plan_vehicle(start, end, algo)
+        if not route:
+            return None, 0, False
         stop_idx, stop_sig = self._execute_vehicle(route)
         self.cache_vehicle[key] = (route, stop_idx, stop_sig)
         return route, stop_idx, stop_sig
 
     # -------- 阶段二：pedestrian -----------
-    def plan_pedestrian(self, start, end, algo='dijkstra'):
+    def plan_pedestrian(self, start: tuple[float], end: tuple[float], algo: str='dijkstra'):
         key = (start, end, 'pedestrian')
         if key in self.cache_pedestrian:
             return self.cache_pedestrian[key]
         route = self._plan_pedestrian(start, end, algo)
+        if not route:
+            return None, 0, False
         stop_idx, stop_sig = self._execute_pedestrian(route)
         self.cache_pedestrian[key] = (route, stop_idx, stop_sig)
         return route, stop_idx, stop_sig
 
     # -------- 阶段三：pedestrian → shelter -----------
-    def plan_shelter(self, start, algo='multi-dijkstra'):
+    def plan_shelter(self, start: tuple[float], algo: str='multi-dijkstra'):
         key = (start, None, 'pedestrian')
         if key in self.cache_pedestrian:
             return self.cache_pedestrian[key]
         route = self._plan_shelter(start, algo)
+        if not route:
+            return None, 0, False
         stop_idx, stop_sig = self._execute_pedestrian(route)
         self.cache_pedestrian[key] = (route, stop_idx, stop_sig)
         return route, stop_idx, stop_sig
@@ -107,6 +113,10 @@ class Planner:
         返回 route: list of nodes 或 None
         """
         H = self.G_vehicle
+        print(start, end)
+        if not (H.has_node(start) and H.has_node(end)):
+            print("Node not found")
+            return None
         if not nx.has_path(H, start, end):
             return None
         if algo == 'dijkstra':
