@@ -71,6 +71,12 @@ class Environment:
         # 初始化 flooded=False
         for u, v in G.edges:
             G.edges[u, v]['flooded'] = False
+
+        # 统一节点键为普通 float 元组，避免 np.float64 与 python float 比较不一致
+        G = nx.relabel_nodes(
+            G,
+            {n: (float(n[0]), float(n[1])) for n in list(G.nodes)}
+        )
         for geom in self.edges_flood.geometry:
             start = tuple(geom.coords[0])
             end = tuple(geom.coords[-1])
@@ -98,10 +104,9 @@ class Environment:
         tree = cKDTree(node_coords)
         for pt in self.shelter_points.geometry:
             _, idx = tree.query([pt.x, pt.y])
-            nearest_node = tuple(node_coords[idx])
-            # 给节点添加 shelter 属性
-            if 'shelter' not in G.nodes[nearest_node]:
-                G.nodes[nearest_node]['shelter'] = True
+            nearest_node = (float(node_coords[idx][0]), float(node_coords[idx][1]))
+            # 给最近节点添加 shelter 属性（该节点已被 relabel 为普通 float 元组）
+            G.nodes[nearest_node]['shelter'] = True
         return G
 
 
