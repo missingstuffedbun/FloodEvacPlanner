@@ -1,6 +1,9 @@
 import networkx as nx
 import numpy as np
 import random
+import logging
+
+logger = logging.getLogger(__name__)
 
 def compute_vehicle_weights(G):
     for u, v, data in G.edges(data=True):
@@ -113,9 +116,9 @@ class Planner:
         返回 route: list of nodes 或 None
         """
         H = self.G_vehicle
-        print(start, end)
+        logger.debug("plan_vehicle: start=%s end=%s", start, end)
         if not (H.has_node(start) and H.has_node(end)):
-            print("Node not found")
+            logger.debug("Node not found")
             return None
         if not nx.has_path(H, start, end):
             return None

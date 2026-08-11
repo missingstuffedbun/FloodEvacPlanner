@@ -4,6 +4,9 @@ import numpy as np
 from scipy.spatial import cKDTree
 from config_manager import get_config
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Environment:
@@ -11,9 +14,9 @@ class Environment:
     def __init__(self):
         config = get_config()
         self.params = config.get('params', {})
-        print("Environment parameters:", self.params)
+        logger.info("Environment parameters: %s", self.params)
 
-        print("Environment initialisation:")
+        logger.info("Environment initialisation:")
         # 加载路网
         self.edges_all = gpd.read_file(os.path.join(config['project_path'], config['input_path'], config['files']['edges_all']))
         self.edges_flood = gpd.read_file(os.path.join(config['project_path'], config['input_path'], config['files']['edges_flood']))
@@ -35,8 +38,8 @@ class Environment:
         self.G_pedestrian = G_pedestrian.to_undirected(as_view=True)
 
         for n in self.G.nodes():
-            print(n)
-        print('Graph loaded.')
+            logger.debug("node: %s", n)
+        logger.info('Graph loaded.')
 
 
     def _build_graph(self):
@@ -130,7 +133,7 @@ class Environment:
         for i in selected_idx:
             pt = self.crash_points.geometry.iloc[i]
             _, idx = tree.query([pt.x, pt.y])
-            nearest_node = tuple(node_coords[idx])
+            nearest_node = (float(node_coords[idx][0]), float(node_coords[idx][1]))
             G.nodes[nearest_node]['crash'] = True
         return G
 

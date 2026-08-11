@@ -1,11 +1,17 @@
 import os
 import os.path
+import logging
 
 from environment import Environment
 from config_manager import init_config, get_config
 from agent import AgentFactory
 from planner import Planner
 import numpy as np
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
 
 # Environment → Planner → Agent
 #                  ↑
@@ -83,7 +89,6 @@ if __name__ == "__main__":
                 agent.add_history('pedestrian', pedestrian_route[:stop_node_id+1], stop_sig)
                 if stop_sig:
                     agent.reached_destination = True
-                    continue
         else:
             # -------- 阶段三：步行到附近 shelter ----------
             shelter_route, stop_node_id, stop_sig = planner.plan_shelter(agent.current_node)
@@ -92,8 +97,12 @@ if __name__ == "__main__":
                 agent.add_history('pedestrian', shelter_route[:stop_node_id+1], stop_sig)
                 if stop_sig:
                     agent.reached_shelter = True
-                    continue
 
-        agent.failed = True
+        # 若全程没有任何路径记录（如起点就无路可走），补一条失败记录，避免 history 为 []
+        if not agent.history:
+            agent.failed = True
+            agent.add_history('failed', [], False)
+
+        # 每个 agent 都保存历史（成功/避难/失败），便于统一统计与可视化
         agent.save_history(os.path.join(config.get('output_path'), config.get('timestamp'), 'history.txt'))
 

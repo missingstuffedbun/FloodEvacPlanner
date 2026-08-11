@@ -3,6 +3,9 @@ import json
 from config_manager import get_config
 import geopandas as gpd
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AgentFactory:
@@ -20,7 +23,7 @@ class AgentFactory:
         self.traffic = gpd.read_file(traffic_path)
         # 解析 origins/destinations
         self.origins, self.destinations = self._parse_traffic()
-        print(f"Parsed {len(self.origins)} origin-destination pairs.")
+        logger.info("Parsed %d origin-destination pairs.", len(self.origins))
 
     def _parse_traffic(self):
         origins_np = self.traffic[['ORIGIN_X', 'ORIGIN_Y']].to_numpy()
@@ -58,5 +61,15 @@ class Agent:
         self.attempts += 1
 
     def save_history(self, output_file):
+        # route 中每个节点是 (float, float) 坐标元组；输出时四舍五入保留 6 位小数，减小体积
+        def _round_nodes(route):
+            return [[round(float(n[0]), 6), round(float(n[1]), 6)] for n in route]
+
+        rounded = []
+        for entry in self.history:
+            e = dict(entry)
+            if isinstance(e.get('exec_route'), list):
+                e['exec_route'] = _round_nodes(e['exec_route'])
+            rounded.append(e)
         with open(output_file, 'a') as f:
-            f.write(json.dumps(self.history) + "\n")
+            f.write(json.dumps(rounded) + "\n")
