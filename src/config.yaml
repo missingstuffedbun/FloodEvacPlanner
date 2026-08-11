@@ -31,3 +31,4 @@ params:
   random_seed: 2025
   sample_size: 200
   max_replan: 10
+  visualize: true            # HTML

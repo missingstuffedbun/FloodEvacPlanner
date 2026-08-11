@@ -34,9 +34,13 @@ class AgentFactory:
 
     def create_agents(self):
         agents = []
+        total = len(self.origins)
         for i, (origin, destination) in enumerate(zip(self.origins, self.destinations), start=1):
             agent = Agent(agent_id=i, origin=origin, destination=destination)
             agents.append(agent)
+            if i % 100 == 0 or i == total:
+                logger.info("Created agent %d/%d (origin=%s, destination=%s)",
+                            i, total, origin, destination)
         return agents
 
 class Agent:

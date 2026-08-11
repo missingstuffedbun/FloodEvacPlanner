@@ -15,7 +15,7 @@ class Config:
 
     def initialize(self, path):
         if not self._initialized:
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 self.data = yaml.safe_load(f)
 
             # ---- 新增：创建带时间戳的输出文件夹 ----

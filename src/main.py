@@ -1,6 +1,7 @@
 import os
 import os.path
 import logging
+import argparse
 
 from environment import Environment
 from config_manager import init_config, get_config
@@ -9,7 +10,7 @@ from planner import Planner
 import numpy as np
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
@@ -38,8 +39,16 @@ def destination_or_shelter(current, destination, shelters, max_distance=3000):
 
 
 if __name__ == "__main__":
-    # 配置 YAML 文件路径（相对于脚本所在目录，避免运行时工作目录问题）
-    config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
+    # -c / --config：指定 YAML 配置文件；默认使用脚本同目录下的 config.yaml
+    parser = argparse.ArgumentParser(description="Flood evacuation planner")
+    parser.add_argument(
+        "-c", "--config",
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml"),
+        help="Path to the YAML config file (default: src/config.yaml)",
+    )
+    args = parser.parse_args()
+
+    config_file = os.path.abspath(args.config)
     init_config(config_file)
     config = get_config()
 
@@ -67,7 +76,8 @@ if __name__ == "__main__":
         agent.current_node = agent.origin
         agent.shelters = shelters
 
-    for agent in agents:
+    total_agents = len(agents)
+    for idx, agent in enumerate(agents, start=1):
         # -------- 阶段一：开车 ----------
         max_replan = config['params']['max_replan']
         while not agent.reached_destination and max_replan > 0:
@@ -105,4 +115,15 @@ if __name__ == "__main__":
 
         # 每个 agent 都保存历史（成功/避难/失败），便于统一统计与可视化
         agent.save_history(os.path.join(config.get('output_path'), config.get('timestamp'), 'history.txt'))
+
+    # -------- 全部 agent 规划完成后，按 config 决定是否生成交互式 HTML 可视化 --------
+    if config.get('params', {}).get('visualize', False):
+        history_path = os.path.join(config.get('output_path'), config.get('timestamp'), 'history.txt')
+        if os.path.exists(history_path):
+            try:
+                from visualize import build_map
+                out_html = os.path.join(config.get('output_path'), config.get('timestamp'), 'evacuation_map.html')
+                build_map(history_path, config_file, out_html)
+            except Exception as e:  # 可视化失败不应中断主流程
+                logging.getLogger(__name__).warning("可视化生成失败：%s", e)
 
